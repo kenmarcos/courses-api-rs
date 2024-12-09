@@ -3,6 +3,7 @@ package br.com.kenmarcos.courses_api_rs.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.kenmarcos.courses_api_rs.dtos.CourseDTO;
 import br.com.kenmarcos.courses_api_rs.dtos.CreateCourseDTO;
 import br.com.kenmarcos.courses_api_rs.entities.CourseEntity;
 import br.com.kenmarcos.courses_api_rs.services.CreateCourseService;
@@ -37,7 +38,7 @@ public class CourseController {
 
       System.out.println("courseEntity:" + courseEntity);
 
-      CourseEntity course = createCourseService.execute(courseEntity);
+      CourseDTO course = createCourseService.execute(courseEntity);
 
       return ResponseEntity.ok().body(course);
     } catch (Exception e) {
