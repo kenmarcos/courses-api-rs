@@ -1,6 +1,7 @@
 package br.com.kenmarcos.courses_api_rs.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.kenmarcos.courses_api_rs.dtos.CourseDTO;
@@ -11,6 +12,7 @@ import br.com.kenmarcos.courses_api_rs.services.FetchCoursesService;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,10 +50,17 @@ public class CourseController {
   }
 
   @GetMapping
-  public ResponseEntity<Object> fetchCourses() {
-    List<CourseEntity> courses = fetchCoursesService.execute();
+  public ResponseEntity<Object> fetchCourses(
+      @RequestParam Optional<String> name,
+      @RequestParam Optional<String> category) {
+    try {
+      List<CourseDTO> courses = fetchCoursesService.execute(name, category);
 
-    return ResponseEntity.ok().body(courses);
+      return ResponseEntity.ok().body(courses);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
   }
 
 }
