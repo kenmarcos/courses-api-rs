@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.kenmarcos.courses_api_rs.dtos.CourseDTO;
 import br.com.kenmarcos.courses_api_rs.dtos.CreateCourseDTO;
+import br.com.kenmarcos.courses_api_rs.dtos.UpdateCourseDTO;
 import br.com.kenmarcos.courses_api_rs.entities.CourseEntity;
 import br.com.kenmarcos.courses_api_rs.exceptions.ResourceNotFoundException;
 import br.com.kenmarcos.courses_api_rs.services.CreateCourseService;
 import br.com.kenmarcos.courses_api_rs.services.DeleteCourseService;
 import br.com.kenmarcos.courses_api_rs.services.FetchCoursesService;
+import br.com.kenmarcos.courses_api_rs.services.UpdateCourseService;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -39,6 +42,9 @@ public class CourseController {
   @Autowired
   private DeleteCourseService deleteCourseService;
 
+  @Autowired
+  private UpdateCourseService updateCourseService;
+
   @PostMapping
   public ResponseEntity<Object> createCourse(@Valid @RequestBody CreateCourseDTO createCourseDTO) {
     try {
@@ -51,7 +57,7 @@ public class CourseController {
 
       CourseDTO course = createCourseService.execute(courseEntity);
 
-      return ResponseEntity.ok().body(course);
+      return ResponseEntity.status(HttpStatus.CREATED).body(course);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -71,6 +77,21 @@ public class CourseController {
     }
 
   }
+
+  @PutMapping("/{courseId}")
+  public ResponseEntity<Object> updateCourse(
+    @PathVariable UUID courseId,
+    @Valid @RequestBody UpdateCourseDTO createCourseDTO) {
+      try {
+        CourseDTO courseUpdated = updateCourseService.execute(courseId, createCourseDTO);
+
+        return ResponseEntity.ok().body(courseUpdated);
+      } catch (ResourceNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); 
+      } catch (Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+      }
+    }
 
   @DeleteMapping("/{courseId}")
   public ResponseEntity<Object> deleteCourse(@PathVariable UUID courseId) {
