@@ -12,6 +12,7 @@ import br.com.kenmarcos.courses_api_rs.exceptions.ResourceNotFoundException;
 import br.com.kenmarcos.courses_api_rs.services.CreateCourseService;
 import br.com.kenmarcos.courses_api_rs.services.DeleteCourseService;
 import br.com.kenmarcos.courses_api_rs.services.FetchCoursesService;
+import br.com.kenmarcos.courses_api_rs.services.ToggleActiveService;
 import br.com.kenmarcos.courses_api_rs.services.UpdateCourseService;
 import jakarta.validation.Valid;
 
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,6 +46,9 @@ public class CourseController {
 
   @Autowired
   private UpdateCourseService updateCourseService;
+
+  @Autowired
+  private ToggleActiveService toggleActiveService;
 
   @PostMapping
   public ResponseEntity<Object> createCourse(@Valid @RequestBody CreateCourseDTO createCourseDTO) {
@@ -99,6 +104,19 @@ public class CourseController {
       deleteCourseService.execute(courseId);
 
       return ResponseEntity.noContent().build();
+    } catch (ResourceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PatchMapping("/{courseId}/active")
+  public ResponseEntity<Object> toggleActive(@PathVariable UUID courseId) {
+    try {
+      CourseDTO course = toggleActiveService.execute(courseId);
+
+      return ResponseEntity.ok().body(course);
     } catch (ResourceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     } catch (Exception e) {
