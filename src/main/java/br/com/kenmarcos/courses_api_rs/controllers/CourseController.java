@@ -14,6 +14,13 @@ import br.com.kenmarcos.courses_api_rs.services.DeleteCourseService;
 import br.com.kenmarcos.courses_api_rs.services.FetchCoursesService;
 import br.com.kenmarcos.courses_api_rs.services.ToggleActiveService;
 import br.com.kenmarcos.courses_api_rs.services.UpdateCourseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -33,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/courses")
+@Tag(name = "Courses", description = "Endpoints de cursos")
 public class CourseController {
 
   @Autowired
@@ -51,6 +59,12 @@ public class CourseController {
   private ToggleActiveService toggleActiveService;
 
   @PostMapping
+  @Operation(summary = "Cria um novo curso")
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", content = {
+      @Content(schema = @Schema(implementation = CourseDTO.class))
+    }),
+  })
   public ResponseEntity<Object> createCourse(@Valid @RequestBody CreateCourseDTO createCourseDTO) {
     try {
       var courseEntity = CourseEntity.builder()
@@ -70,6 +84,12 @@ public class CourseController {
   }
 
   @GetMapping
+  @Operation(summary = "Lista todos os cursos")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", content = {
+      @Content(array = @ArraySchema(schema = @Schema(implementation = CourseDTO.class)))
+    })
+  })
   public ResponseEntity<Object> fetchCourses(
       @RequestParam Optional<String> name,
       @RequestParam Optional<String> category) {
@@ -84,6 +104,13 @@ public class CourseController {
   }
 
   @PutMapping("/{courseId}")
+  @Operation(summary = "Atualiza um curso")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", content = {
+      @Content(schema = @Schema(implementation = CourseDTO.class))
+    }),
+    @ApiResponse(responseCode = "404", description = "Curso nao encontrado"),
+  })
   public ResponseEntity<Object> updateCourse(
     @PathVariable UUID courseId,
     @Valid @RequestBody UpdateCourseDTO createCourseDTO) {
@@ -99,6 +126,11 @@ public class CourseController {
     }
 
   @DeleteMapping("/{courseId}")
+  @Operation(summary = "Deleta um curso")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204"),
+    @ApiResponse(responseCode = "404", description = "Curso nao encontrado"),
+  })
   public ResponseEntity<Object> deleteCourse(@PathVariable UUID courseId) {
     try {
       deleteCourseService.execute(courseId);
@@ -112,6 +144,13 @@ public class CourseController {
   }
 
   @PatchMapping("/{courseId}/active")
+  @Operation(summary = "Ativa ou desativa um curso")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", content = {
+      @Content(schema = @Schema(implementation = CourseDTO.class))
+    }),
+    @ApiResponse(responseCode = "404", description = "Curso nao encontrado"),
+  })
   public ResponseEntity<Object> toggleActive(@PathVariable UUID courseId) {
     try {
       CourseDTO course = toggleActiveService.execute(courseId);
